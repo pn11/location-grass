@@ -9,6 +9,7 @@ COLOR_DICT = {
     "Kyoto": "brown",
     "Kobe": "red",
     "Hida": "white",
+    "Shizuoka": "lightgreen",
     "USA": "red",
     "Korea": "red",
     "China": "red",
@@ -109,6 +110,9 @@ class Histogram:
     def flatten(self):
         return sorted(self._dict.items(), key=lambda x: -x[1])
 
+    def get_entry(self, key):
+        return self._dict[key]
+
     def __str__(self):
         return str(self._dict)
 
@@ -133,7 +137,7 @@ def create_legend(data_dict):
 
         label_xpos = LEGEND_SQUARE_WIDTH + LEGEND_GAP_WIDTH
         label_ypos = (i+1)*(LEGEND_SQUARE_WIDTH+LEGEND_GAP_WIDTH)
-        legend_group.add(svgwrite.text.Text(text=loc, insert=(label_xpos, label_ypos)))
+        legend_group.add(svgwrite.text.Text(text=f"{loc} ({loc_histo.get_entry(loc)} days)", insert=(label_xpos, label_ypos)))
     dwg.add(legend_group)
     dwg.save()
 
