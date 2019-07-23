@@ -7,13 +7,19 @@ COLOR_DICT = {
     "Tokyo": "black",
     "Osaka": "yellow",
     "Kyoto": "brown",
+    "Nara": "#c39143",
     "Kobe": "red",
     "Hida": "white",
     "Shizuoka": "lightgreen",
     "USA": "red",
     "Korea": "red",
     "China": "red",
-    "Australia": "red"
+    "Australia": "red",
+    "US-AL": "red",
+    "US-LA": "red",
+    "US-GA": "red",
+    "US-TN": "red",
+    "US-TX": "red"
 }
 
 MAX_NUM_WEEK_IN_YEAR = 54
@@ -35,6 +41,10 @@ def calc_pos(year:int, month:int, day:int):
     return x, y
 
 
+def daterange(_start, _end):
+    for i in range((_end - _start).days):
+        yield _start + datetime.timedelta(i)
+
 def load_data():
     data_dict = {}
     year_list = []
@@ -45,12 +55,18 @@ def load_data():
         with open(fname) as f:
             lines = f.readlines()
             for l in lines:
-                month = int(l[:2])
-                day = int(l[2:5])
-                location = l[5:].rstrip()
-                datestr = "{:0d}-{:0d}-{:0d}".format(year,month,day)
-                x,y = calc_pos(year, month, day)
-                data_dict[datestr] = {"location": location, "x": x, "y": y}
+                date, location = l.split('\t')
+                start_date = datetime.date(int(year), int(date[:2]), int(date[2:4]))
+                if date.find('-') > 0:
+                    end_date = datetime.date(int(year), int(date[5:7]), int(date[7:9])) + datetime.timedelta(1)
+                else:
+                    end_date = start_date + datetime.timedelta(1)
+
+                for d in daterange(start_date, end_date):
+                    location = location.rstrip()
+                    datestr = "{:0d}-{:0d}-{:0d}".format(year,d.month,d.day)
+                    x,y = calc_pos(year, d.month, d.day)
+                    data_dict[datestr] = {"location": location, "x": x, "y": y}
     return year_list, data_dict
 
 
