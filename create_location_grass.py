@@ -2,26 +2,6 @@ import datetime
 import glob
 import svgwrite
 
-COLOR_DICT = {
-    "Tochigi": "green",
-    "Tokyo": "black",
-    "Osaka": "yellow",
-    "Kyoto": "brown",
-    "Nara": "#c39143",
-    "Kobe": "red",
-    "Hida": "white",
-    "Shizuoka": "lightgreen",
-    "USA": "red",
-    "Korea": "red",
-    "China": "red",
-    "Australia": "red",
-    "US-AL": "red",
-    "US-LA": "red",
-    "US-GA": "red",
-    "US-TN": "red",
-    "US-TX": "red"
-}
-
 MAX_NUM_WEEK_IN_YEAR = 54
 SQUARE_WIDTH = 10
 GAP_WIDTH = 2
@@ -29,6 +9,24 @@ TOP_MARGIN = 50
 LEFT_MARGIN = 50
 LEGEND_SQUARE_WIDTH = 20
 LEGEND_GAP_WIDTH = 4
+
+
+def get_color(location:str):
+    COLOR_DICT = {
+        "Tochigi": "green",
+        "Tokyo": "black",
+        "Osaka": "yellow",
+        "Kyoto": "brown",
+        "Nara": "#c39143",
+        "Kobe": "lightblue",
+        "Hida": "lightgray",
+        "Shizuoka": "lightgreen",
+    }
+
+    try:
+        return COLOR_DICT[location]
+    except Exception:
+        return "red"
 
 
 def calc_pos(year:int, month:int, day:int):
@@ -48,7 +46,7 @@ def daterange(_start, _end):
 def load_data():
     data_dict = {}
     year_list = []
-    fnames = glob.glob("data/*.txt")
+    fnames = glob.glob("data/*.tsv")
     for fname in fnames:
         year = int(fname[-8:-4])
         year_list.append(year)
@@ -79,7 +77,7 @@ def create_square_group(year, data_dict):
         x = data['x']
         y = data['y']
         location = data['location']
-        square_group.add(svgwrite.shapes.Rect(insert=(x, y), size=(SQUARE_WIDTH,SQUARE_WIDTH), fill=COLOR_DICT[location]))
+        square_group.add(svgwrite.shapes.Rect(insert=(x, y), size=(SQUARE_WIDTH,SQUARE_WIDTH), fill=get_color(location)))
     return square_group
 
 
@@ -146,10 +144,10 @@ def create_histogram(data_dict):
 def create_legend(data_dict):
     loc_histo = create_histogram(data_dict)
     legend_group = svgwrite.container.Group()
-    dwg = svgwrite.Drawing(filename='image/legend.svg', size=("1000","500"))
+    dwg = svgwrite.Drawing(filename='image/legend.svg', size=("400","800"))
     for i, (loc, entries) in enumerate(loc_histo.flatten()):
         square_ypos = (i+0.5)*(LEGEND_SQUARE_WIDTH+LEGEND_GAP_WIDTH)
-        legend_group.add(svgwrite.shapes.Rect(insert=(0, square_ypos), size=(LEGEND_SQUARE_WIDTH,LEGEND_SQUARE_WIDTH), fill=COLOR_DICT[loc]))
+        legend_group.add(svgwrite.shapes.Rect(insert=(0, square_ypos), size=(LEGEND_SQUARE_WIDTH,LEGEND_SQUARE_WIDTH), fill=get_color(loc)))
 
         label_xpos = LEGEND_SQUARE_WIDTH + LEGEND_GAP_WIDTH
         label_ypos = (i+1)*(LEGEND_SQUARE_WIDTH+LEGEND_GAP_WIDTH)
@@ -162,7 +160,7 @@ if __name__ == "__main__":
     year_list, data_dict = load_data()
 
     for year in year_list:
-        dwg = svgwrite.Drawing(filename=f'image/{year}.svg', size=("1000","500"))
+        dwg = svgwrite.Drawing(filename=f'image/{year}.svg', size=("800","200"))
 
         dwg.add(create_square_group(year, data_dict))
         dwg.add(create_day_group())
