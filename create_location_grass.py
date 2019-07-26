@@ -32,7 +32,13 @@ def get_color(location:str):
 def calc_pos(year:int, month:int, day:int):
     date = datetime.datetime(year, month, day)
     isocal = date.isocalendar()
-    week_in_year = isocal[1]
+    # ISO calendar の年と実際の年の違いを補正
+    if isocal[0] < year:
+        week_in_year = isocal[1] - 52
+    elif isocal[0] > year:
+        week_in_year = isocal[1] + 52
+    else:
+        week_in_year = isocal[1]
     weekday = isocal[2]
     x = (SQUARE_WIDTH+GAP_WIDTH) * (week_in_year-1)
     y = (SQUARE_WIDTH+GAP_WIDTH) * (weekday-1)
