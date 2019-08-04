@@ -115,6 +115,8 @@ def create_day_group():
 
 
 class Histogram:
+    ## Change to history data
+    ## Add attrinutes: last visited, longest stay, first visited
     def __init__(self):
         self._dict = {}
 
