@@ -34,7 +34,7 @@ def calc_pos(year:int, month:int, day:int):
     isocal = date.isocalendar()
     # ISO calendar の年と実際の年の違いを補正
     if isocal[0] < year:
-        week_in_year = isocal[1] - 52
+        week_in_year = 0
     elif isocal[0] > year:
         week_in_year = isocal[1] + 52
     else:
