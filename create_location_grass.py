@@ -66,6 +66,7 @@ def load_data():
             lines = f.readlines()
             for l in lines:
                 date, location = l.split('\t')
+                location = [l.strip().rstrip() for l in location.split('>')]
                 start_date = datetime.date(int(year), int(date[:2]), int(date[2:4]))
                 if date.find('-') > 0:
                     end_date = datetime.date(int(year), int(date[5:7]), int(date[7:9])) + datetime.timedelta(1)
@@ -73,7 +74,6 @@ def load_data():
                     end_date = start_date + datetime.timedelta(1)
 
                 for d in daterange(start_date, end_date):
-                    location = location.rstrip()
                     datestr = "{:0d}-{:0d}-{:0d}".format(year,d.month,d.day)
                     x,y = calc_pos(year, d.month, d.day)
                     data_dict[datestr] = {"location": location, "x": x, "y": y}
@@ -89,7 +89,9 @@ def create_square_group(year, data_dict):
         x = data['x']
         y = data['y']
         location = data['location']
-        square_group.add(svgwrite.shapes.Rect(insert=(x, y), size=(SQUARE_WIDTH,SQUARE_WIDTH), fill=get_color(location)))
+        nloc = len(location)
+        for i, loc in enumerate(location):
+            square_group.add(svgwrite.shapes.Rect(insert=(x, y+i*SQUARE_WIDTH/nloc), size=(SQUARE_WIDTH,SQUARE_WIDTH/nloc), fill=get_color(location[i])))
     return square_group
 
 
@@ -126,8 +128,8 @@ class Histogram:
     def __init__(self):
         self._dict = {}
 
-    def fill(self, key):
-        self._dict[key] = self._dict.get(key, 0) + 1
+    def fill(self, key, weight=1):
+        self._dict[key] = self._dict.get(key, 0) + weight
 
     def get_dict(self):
         return self._dict
@@ -136,8 +138,16 @@ class Histogram:
         print(self.flatten())
 
     def flatten(self):
+        self.round()
         return sorted(self._dict.items(), key=lambda x: -x[1])
 
+    def round(self):
+        for k, v in self._dict.items():
+            rounded = round(v, 1)
+            if str(rounded)[-1] == "0":
+                # ex. 123.0 -> 123
+                rounded = int(rounded)
+            self._dict[k] = rounded
     def get_entry(self, key):
         return self._dict[key]
 
@@ -151,7 +161,8 @@ class Histogram:
 def create_histogram(data_dict):
     loc_histo = Histogram()
     for k, v in data_dict.items():
-        loc_histo.fill(v['location'])
+        for loc in v['location']:
+            loc_histo.fill(loc, weight=1/len(v['location']))
     return loc_histo
 
 
