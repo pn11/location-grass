@@ -5,10 +5,14 @@ import svgwrite
 MAX_NUM_WEEK_IN_YEAR = 54
 SQUARE_WIDTH = 10
 GAP_WIDTH = 2
-TOP_MARGIN = 50
+TOP_MARGIN = 30
 LEFT_MARGIN = 50
+IMAGE_WIDTH = 700 # 54*12+50 = 698
+IMAGE_HEIGHT = 120 # 7*12+30 = 114
 LEGEND_SQUARE_WIDTH = 20
 LEGEND_GAP_WIDTH = 4
+LEGEND_IMAGE_WIDTH = 200
+LEGEND_IMAGE_HEIGHT = 1500
 
 
 def get_color(location:str):
@@ -20,7 +24,9 @@ def get_color(location:str):
         "Nara": "#c39143",
         "Kobe": "lightblue",
         "Hida": "lightgray",
+        "Toyama": "lightgray",
         "Shizuoka": "lightgreen",
+        "Jeju": "orange"
     }
 
     try:
@@ -152,7 +158,7 @@ def create_histogram(data_dict):
 def create_legend(data_dict):
     loc_histo = create_histogram(data_dict)
     legend_group = svgwrite.container.Group()
-    dwg = svgwrite.Drawing(filename='image/legend.svg', size=("400","800"))
+    dwg = svgwrite.Drawing(filename='image/legend.svg', size=(str(LEGEND_IMAGE_WIDTH), str(LEGEND_IMAGE_HEIGHT)))
     for i, (loc, entries) in enumerate(loc_histo.flatten()):
         square_ypos = (i+0.5)*(LEGEND_SQUARE_WIDTH+LEGEND_GAP_WIDTH)
         legend_group.add(svgwrite.shapes.Rect(insert=(0, square_ypos), size=(LEGEND_SQUARE_WIDTH,LEGEND_SQUARE_WIDTH), fill=get_color(loc)))
@@ -168,7 +174,7 @@ if __name__ == "__main__":
     year_list, data_dict = load_data()
 
     for year in year_list:
-        dwg = svgwrite.Drawing(filename=f'image/{year}.svg', size=("800","200"))
+        dwg = svgwrite.Drawing(filename=f'image/{year}.svg', size=(str(IMAGE_WIDTH), str(IMAGE_HEIGHT)))
 
         dwg.add(create_square_group(year, data_dict))
         dwg.add(create_day_group())
